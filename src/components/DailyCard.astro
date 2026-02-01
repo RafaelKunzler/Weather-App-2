@@ -1,0 +1,38 @@
+---
+import { Image } from 'astro:assets';
+
+import cloudy from '../assets/images/icon-partly-cloudy.webp'
+import drizzle from '../assets/images/icon-drizzle.webp'
+import fog from '../assets/images/icon-fog.webp'
+import overcast from '../assets/images/icon-overcast.webp'
+import partlyCloud from '../assets/images/icon-partly-cloudy.webp'
+import rain from '../assets/images/icon-rain.webp'
+import snow from '../assets/images/icon-snow.webp'
+import storm from '../assets/images/icon-storm.webp'
+import sunny from '../assets/images/icon-sunny.webp'
+
+const iconMap ={
+  cloudy,
+  drizzle,
+  fog,
+  overcast,
+  partlyCloud,
+  rain,
+  snow,
+  storm,
+  sunny,
+}
+
+const { day, imagePath } = Astro.props
+const icon = iconMap[imagePath]
+
+---
+
+<div class="w-full bg-neutral-800 rounded-xl p-3 text-center items-center">
+  <p>{day}</p>
+  <Image src={icon} alt="rain" class="w-full self-center"/>
+  <div class="flex justify-between">
+    <p>20°</p>
+    <p>14°</p>
+  </div>
+</div>
