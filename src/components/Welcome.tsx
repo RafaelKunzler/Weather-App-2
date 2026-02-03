@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { format } from 'date-fns';
 
 import Today from "./Today.tsx";
 import InfoCard from "./InfoCard.tsx";
@@ -11,8 +12,13 @@ import search from '../assets/images/icon-search.svg'
 
 const Welcome = () => {
 
+	const today = new Date()
+	const formattedToday = format(today, 'PPPP');
+
 	const [city, setCity] = useState("São Paulo")
 	const [todayTemperature, setTodayTemperature] = useState(21)
+	const [todayWeatherCode, setTodayWeatherCode] = useState(0)
+
 
 
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -42,6 +48,7 @@ const Welcome = () => {
 		if(weatherData){
 			setCity(cityName)
 			setTodayTemperature(weatherData.current_weather.temperature)
+			setTodayWeatherCode(weatherData.current_weather.weathercode)
 		}
 
 	}
@@ -73,7 +80,7 @@ const Welcome = () => {
 			<div className="flex gap-12">
 				<div className="w-2/3">
 					<div>
-						<Today city={city} date="Tuesday, Aug 5, 2025" temperature={todayTemperature} imagePath="fog" unit="°"/>
+						<Today city={city} date={formattedToday} temperature={todayTemperature} weatherCode={todayWeatherCode} unit="°"/>
 						<div className="flex w-full gap-3 mt-4">
 							<InfoCard title="Feels Like" number={18} unit="°" />
 							<InfoCard title="Humidity" number={46} unit="%" />

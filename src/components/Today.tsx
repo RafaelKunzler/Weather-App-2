@@ -1,8 +1,4 @@
-
-import Image from "astro/components/Image.astro";
-import sun from "../assets/images/icon-sunny.webp";
-import React from 'react'
-import { useEffect, useState } from "react";
+import { getWeatherIcon } from '../utils/getWeatherIcon'
 
 import cloudy from '../assets/images/icon-partly-cloudy.webp'
 import drizzle from '../assets/images/icon-drizzle.webp'
@@ -30,11 +26,11 @@ type TodayProps = {
   city: string
   date: string
   temperature: number
-  imagePath: WeatherIcon
+  weatherCode: WeatherIcon | number
   unit: string
 }
 
-const Today = ({city, date, temperature, imagePath, unit}: TodayProps) => {
+const Today = ({city, date, temperature, weatherCode, unit}: TodayProps) => {
   const iconMap: Record<WeatherIcon, ImageMetadata> = {
   cloudy,
   drizzle,
@@ -47,7 +43,8 @@ const Today = ({city, date, temperature, imagePath, unit}: TodayProps) => {
   sunny,
 }
 
-const icon = iconMap[imagePath]
+const weatherIcon = getWeatherIcon(weatherCode)
+const icon: Record<WeatherIcon, ImageMetadata> = iconMap[weatherIcon]
 
 
   return (
@@ -60,7 +57,7 @@ const icon = iconMap[imagePath]
       </div>
       <div className="flex items-center">
         <img src={icon.src} alt="sun" className="w-24" />
-        <h1 className="font-bold text-6xl">{temperature}{unit}</h1>
+        <h1 className="font-bold text-6xl">{Math.round(temperature)}{unit}</h1>
       </div>
     </div >
 
