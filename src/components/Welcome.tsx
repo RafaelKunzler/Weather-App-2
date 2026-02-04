@@ -13,19 +13,23 @@ const Welcome = () => {
 	const today = new Date()
 	const formattedToday = format(today, 'PPPP');
 
-	const [city, setCity] = useState("São Paulo")
-	const [todayTemperature, setTodayTemperature] = useState(21)
-	const [todayWeatherCode, setTodayWeatherCode] = useState(0)
-	const [windSpeed, setWindSpeed] = useState(14)
-	const [apparentTemperature, setApparentTemperature] = useState(21)
-	const [humidity, setHumidity] = useState(40)
-	const [precipitation, setPrecipitation] = useState(12)
+	const [city, setCity] = useState("")
+	const [todayTemperature, setTodayTemperature] = useState()
+	const [todayWeatherCode, setTodayWeatherCode] = useState()
+	const [windSpeed, setWindSpeed] = useState()
+	const [apparentTemperature, setApparentTemperature] = useState()
+	const [humidity, setHumidity] = useState()
+	const [precipitation, setPrecipitation] = useState()
 
 	const [dailymaxTemp, setDailyMaxTemp] = useState([])
 	const [dailyminTemp, setDailyMinTemp] = useState([])
 	const [dailyWeatherCode, setDailyWeatherCode] = useState([])
 	const [dailyTime, setDailyTime] = useState([])
-	
+
+
+	useEffect(() => {
+		fetchWeather(-23.5475, -46.63611, "São Paulo")
+	}, [])
 
 
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -43,9 +47,12 @@ const Welcome = () => {
 		}
 
 		const { latitude, longitude } = geoData.results[0];
+		console.log(latitude, longitude);
 
+		fetchWeather(latitude, longitude, cityName)
+	}
 
-		//Get Weather
+	const fetchWeather = async (latitude, longitude, cityName) => {
 		const url = new URL('https://api.open-meteo.com/v1/forecast')
 
 		url.searchParams.set('latitude', String(latitude))
@@ -91,22 +98,23 @@ const Welcome = () => {
 		console.log(weatherData)
 
 		if (weatherData) {
-			setCity(cityName)
-			setTodayTemperature(weatherData.current.temperature_2m)
-			setTodayWeatherCode(weatherData.current.weathercode)
-			setWindSpeed(weatherData.current.wind_speed_10m)
-			setApparentTemperature(weatherData.current.apparent_temperature)
-			setHumidity(weatherData.current.relative_humidity_2m)
-			setPrecipitation(weatherData.current.precipitation)
-
-			setDailyMaxTemp(weatherData.daily.temperature_2m_max)
-			setDailyMinTemp(weatherData.daily.temperature_2m_min)
-			setDailyWeatherCode(weatherData.daily.weathercode)
-			setDailyTime(weatherData.daily.time)
-
+			changeStates(weatherData, cityName)
 		}
+	}
 
+	const changeStates = (weatherData, cityName) => {
+		setCity(cityName)
+		setTodayTemperature(weatherData.current.temperature_2m)
+		setTodayWeatherCode(weatherData.current.weathercode)
+		setWindSpeed(weatherData.current.wind_speed_10m)
+		setApparentTemperature(weatherData.current.apparent_temperature)
+		setHumidity(weatherData.current.relative_humidity_2m)
+		setPrecipitation(weatherData.current.precipitation)
 
+		setDailyMaxTemp(weatherData.daily.temperature_2m_max)
+		setDailyMinTemp(weatherData.daily.temperature_2m_min)
+		setDailyWeatherCode(weatherData.daily.weathercode)
+		setDailyTime(weatherData.daily.time)
 	}
 
 	useEffect(() => {

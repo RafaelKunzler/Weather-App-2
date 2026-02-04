@@ -57,7 +57,7 @@ const icon: Record<WeatherIcon, ImageMetadata> = iconMap[weatherIcon]
       </div>
       <div className="flex items-center">
         <img src={icon.src} alt="sun" className="w-24" />
-        <h1 className="font-bold text-6xl">{Math.round(temperature)}{unit}</h1>
+        <h1 className="font-bold text-6xl">{Math.round(temperature) || 23}{unit}</h1>
       </div>
     </div >
 
