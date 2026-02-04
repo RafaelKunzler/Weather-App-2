@@ -1,12 +1,10 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { format } from 'date-fns';
 
 import Today from "./Today.tsx";
 import InfoCard from "./InfoCard.tsx";
 import DailyCard from "./DailyCard.tsx";
 import HourlyCard from "./HourlyCard.tsx";
-
-import.meta.env.API_KEY;
 
 import search from '../assets/images/icon-search.svg'
 
@@ -18,7 +16,16 @@ const Welcome = () => {
 	const [city, setCity] = useState("São Paulo")
 	const [todayTemperature, setTodayTemperature] = useState(21)
 	const [todayWeatherCode, setTodayWeatherCode] = useState(0)
+	const [windSpeed, setWindSpeed] = useState(14)
+	const [apparentTemperature, setApparentTemperature] = useState(21)
+	const [humidity, setHumidity] = useState(40)
+	const [precipitation, setPrecipitation] = useState(12)
 
+	const [dailymaxTemp, setDailyMaxTemp] = useState([])
+	const [dailyminTemp, setDailyMinTemp] = useState([])
+	const [dailyWeatherCode, setDailyWeatherCode] = useState([])
+	const [dailyTime, setDailyTime] = useState([])
+	
 
 
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -39,19 +46,72 @@ const Welcome = () => {
 
 
 		//Get Weather
-		const weatherRes = await fetch(
-			`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`,
-		);
-		const weatherData = await weatherRes.json();
-		console.log(weatherData);
+		const url = new URL('https://api.open-meteo.com/v1/forecast')
 
-		if(weatherData){
+		url.searchParams.set('latitude', String(latitude))
+		url.searchParams.set('longitude', String(longitude))
+
+		url.searchParams.set(
+			'current',
+			[
+				'temperature_2m',
+				'apparent_temperature',
+				'relative_humidity_2m',
+				'precipitation',
+				'weathercode',
+				'wind_speed_10m',
+			].join(',')
+		)
+
+		url.searchParams.set(
+			'daily',
+			[
+				'weathercode',
+				'temperature_2m_max',
+				'temperature_2m_min',
+			].join(',')
+		)
+
+		url.searchParams.set(
+			'hourly',
+			[
+				'temperature_2m',
+				'weathercode',
+			].join(',')
+		)
+
+		url.searchParams.set('temperature_unit', 'celsius')
+		url.searchParams.set('wind_speed_unit', 'kmh')
+		url.searchParams.set('precipitation_unit', 'mm')
+		url.searchParams.set('timezone', 'auto')
+
+		const weatherRes = await fetch(url.toString())
+		const weatherData = await weatherRes.json()
+
+		console.log(weatherData)
+
+		if (weatherData) {
 			setCity(cityName)
-			setTodayTemperature(weatherData.current_weather.temperature)
-			setTodayWeatherCode(weatherData.current_weather.weathercode)
+			setTodayTemperature(weatherData.current.temperature_2m)
+			setTodayWeatherCode(weatherData.current.weathercode)
+			setWindSpeed(weatherData.current.wind_speed_10m)
+			setApparentTemperature(weatherData.current.apparent_temperature)
+			setHumidity(weatherData.current.relative_humidity_2m)
+			setPrecipitation(weatherData.current.precipitation)
+
+			setDailyMaxTemp(weatherData.daily.temperature_2m_max)
+			setDailyMinTemp(weatherData.daily.temperature_2m_min)
+			setDailyWeatherCode(weatherData.daily.weathercode)
+			setDailyTime(weatherData.daily.time)
+
 		}
 
+
 	}
+
+	useEffect(() => {
+		console.log('dailyForecast atualizado:', dailyTime)
+	}, [dailyTime])
 
 	return (
 		<div className="pb-10">
@@ -80,23 +140,19 @@ const Welcome = () => {
 			<div className="flex gap-12">
 				<div className="w-2/3">
 					<div>
-						<Today city={city} date={formattedToday} temperature={todayTemperature} weatherCode={todayWeatherCode} unit="°"/>
+						<Today city={city} date={formattedToday} temperature={todayTemperature} weatherCode={todayWeatherCode} unit="°" />
 						<div className="flex w-full gap-3 mt-4">
-							<InfoCard title="Feels Like" number={18} unit="°" />
-							<InfoCard title="Humidity" number={46} unit="%" />
-							<InfoCard title="Wind" number={14} unit=" km/h" />
-							<InfoCard title="Precipitation" number={0} unit="mm" />
+							<InfoCard title="Feels Like" number={apparentTemperature} unit="°" />
+							<InfoCard title="Humidity" number={humidity} unit="%" />
+							<InfoCard title="Wind" number={windSpeed} unit=" km/h" />
+							<InfoCard title="Precipitation" number={precipitation} unit="mm" />
 						</div>
 						<div className="mt-6">
 							<p>Daily forecast</p>
 							<div className="flex gap-2 mt-3">
-								<DailyCard day="Tue" imagePath="rain" />
-								<DailyCard day="Wed" imagePath="drizzle" />
-								<DailyCard day="Thu" imagePath="sunny" />
-								<DailyCard day="Fri" imagePath="cloudy" />
-								<DailyCard day="Sat" imagePath="storm" />
-								<DailyCard day="Sun" imagePath="fog" />
-								<DailyCard day="Mon" imagePath="partlyCloud" />
+								{Array.from({ length: 7 }).map((_, index) => (
+									<DailyCard day={dailyTime[index] || "2026-02-04"} weatherCode={dailyWeatherCode[index]} maxTemp={dailymaxTemp[index]} minTemp={dailyminTemp[index]} />
+								))}
 							</div>
 						</div>
 					</div>
@@ -123,39 +179,3 @@ const Welcome = () => {
 }
 
 export default Welcome
-
-
-
-
-{/* <script>
-
-document.getElementById("search")?.addEventListener("submit", async (e) => {
-	e.preventDefault();
-
-	const cityName = document.getElementById("city_name").value;
-	const GEO_URL = `https://geocoding-api.open-meteo.com/v1/search?name=${cityName}&count=1&language=en&format=json`;
-
-	//Get Geo data from API
-	const geoRes = await fetch(GEO_URL);
-	const geoData = await geoRes.json();
-	if (!geoData.results?.length) {
-		return new Response("City not found", { status: 404 });
-	}
-
-	const { latitude, longitude } = geoData.results[0];
-
-	//Get Weather
-	const weatherRes = await fetch(
-		`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`,
-	);
-	const weatherData = await weatherRes.json();
-	console.log(weatherData);
-
-
-	return new Response(JSON.stringify(weatherData), {
-		status: 200,
-		headers: { "Content-Type": "application/json" },
-	});
-});
-</script >
- */}
