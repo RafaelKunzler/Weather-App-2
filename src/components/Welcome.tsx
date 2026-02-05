@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { format } from 'date-fns';
+import { format, parseISO, startOfHour, isAfter, isEqual } from 'date-fns';
 
 import Today from "./Today.tsx";
 import InfoCard from "./InfoCard.tsx";
@@ -10,8 +10,9 @@ import search from '../assets/images/icon-search.svg'
 
 const Welcome = () => {
 
-	const today = new Date()
+	const today = startOfHour(new Date())
 	const formattedToday = format(today, 'PPPP');
+	const day = format(today, 'iiii');
 
 	const [city, setCity] = useState("")
 	const [todayTemperature, setTodayTemperature] = useState()
@@ -26,7 +27,12 @@ const Welcome = () => {
 	const [dailyWeatherCode, setDailyWeatherCode] = useState([])
 	const [dailyTime, setDailyTime] = useState([])
 
+	const [hourlyTemp, setHourlyTemp] = useState([])
+	const [hourlyTime, setHourlyTime] = useState([])
+	const [hourlyWeatherCode, setHourlyWeatherCode] = useState([])
+	
 
+	//fetch weather on start
 	useEffect(() => {
 		fetchWeather(-23.5475, -46.63611, "São Paulo")
 	}, [])
@@ -52,7 +58,7 @@ const Welcome = () => {
 		fetchWeather(latitude, longitude, cityName)
 	}
 
-	const fetchWeather = async (latitude, longitude, cityName) => {
+	const fetchWeather = async (latitude: number, longitude: number, cityName: string) => {
 		const url = new URL('https://api.open-meteo.com/v1/forecast')
 
 		url.searchParams.set('latitude', String(latitude))
@@ -102,6 +108,7 @@ const Welcome = () => {
 		}
 	}
 
+	// set states after weather fetch
 	const changeStates = (weatherData, cityName) => {
 		setCity(cityName)
 		setTodayTemperature(weatherData.current.temperature_2m)
@@ -115,11 +122,23 @@ const Welcome = () => {
 		setDailyMinTemp(weatherData.daily.temperature_2m_min)
 		setDailyWeatherCode(weatherData.daily.weathercode)
 		setDailyTime(weatherData.daily.time)
+
+		setHourlyTemp(weatherData.hourly.temperature_2m)
+		setHourlyWeatherCode(weatherData.hourly.weathercode)
+		const hours = weatherData.hourly.time
+		const next7Hours = hours
+			.map(time => parseISO(time)) // string -> Date
+			.filter(date => isAfter(date, today) || isEqual(date, today))
+			.slice(0, 24)
+			.map(date => format(date, 'H a'));
+			setHourlyTime(next7Hours)
 	}
 
 	useEffect(() => {
-		console.log('dailyForecast atualizado:', dailyTime)
-	}, [dailyTime])
+		console.log('hourlyForecast atualizado:', hourlyTime)
+	}, [hourlyTime])
+
+
 
 	return (
 		<div className="pb-10">
@@ -168,17 +187,13 @@ const Welcome = () => {
 				<div className="bg-neutral-800 w-1/3 px-4 py-6 rounded-lg mt-10">
 					<div className="flex justify-between mb-8">
 						<p>Hourly forecast</p>
-						<p>Tuesday</p>
+						<p>{day}</p>
 					</div>
 					<div className="flex flex-col gap-3">
-						<HourlyCard imagePath="cloudy" hour="3 PM" climate="20°" />
-						<HourlyCard imagePath="cloudy" hour="3 PM" climate="20°" />
-						<HourlyCard imagePath="cloudy" hour="3 PM" climate="20°" />
-						<HourlyCard imagePath="cloudy" hour="3 PM" climate="20°" />
-						<HourlyCard imagePath="cloudy" hour="3 PM" climate="20°" />
-						<HourlyCard imagePath="cloudy" hour="3 PM" climate="20°" />
-						<HourlyCard imagePath="cloudy" hour="3 PM" climate="20°" />
-						<HourlyCard imagePath="cloudy" hour="3 PM" climate="20°" />
+						{Array.from({ length: 8 }).map((_, index) => (
+							<HourlyCard weatherCode={hourlyWeatherCode[index]} hour={hourlyTime[index] || "2026-02-04"} climate={hourlyTemp[index]} />
+						))}
+
 					</div>
 				</div>
 			</div>
