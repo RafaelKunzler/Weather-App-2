@@ -52,9 +52,9 @@ const DailyCard = ({ day, weatherCode, maxTemp, minTemp }: DailyCardProps) => {
 
 
   return (
-    <div className="w-full bg-neutral-800 rounded-xl p-3 text-center items-center">
+    <div className="lg:w-full bg-neutral-800 rounded-xl p-3 text-center items-center">
       <p>{formattedToday || "Tue"}</p>
-      <img src={icon.src} alt={icon.src} className="w-full self-center" />
+      <img src={icon.src} alt={icon.src} className="lg:w-full w-16 self-center" />
       <div className="flex justify-between">
         <p>{Math.round(maxTemp) || 30}°</p>
         <p>{Math.round(minTemp) || 14}°</p>

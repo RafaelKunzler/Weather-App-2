@@ -30,7 +30,7 @@ const Welcome = () => {
 	const [hourlyTemp, setHourlyTemp] = useState([])
 	const [hourlyTime, setHourlyTime] = useState([])
 	const [hourlyWeatherCode, setHourlyWeatherCode] = useState([])
-	
+
 
 	//fetch weather on start
 	useEffect(() => {
@@ -131,7 +131,7 @@ const Welcome = () => {
 			.filter(date => isAfter(date, today) || isEqual(date, today))
 			.slice(0, 24)
 			.map(date => format(date, 'H a'));
-			setHourlyTime(next7Hours)
+		setHourlyTime(next7Hours)
 	}
 
 	useEffect(() => {
@@ -144,8 +144,8 @@ const Welcome = () => {
 		<div className="pb-10">
 			<div className="flex flex-col gap-12 items-center">
 				<h1 className="font-bold text-5xl text-center">How's the sky looking today?</h1>
-				<form onSubmit={handleSubmit} method="get" className="flex w-1/2 gap-4 text-neutral-100">
-					<div className="relative w-full">
+				<form onSubmit={handleSubmit} method="get" className="flex flex-col lg:flex-row w-1/2 gap-4 text-neutral-100">
+					<div className="relative lg:w-full">
 						<img
 							src={search.src}
 							alt="search"
@@ -164,11 +164,11 @@ const Welcome = () => {
 					</button>
 				</form>
 			</div>
-			<div className="flex gap-12">
-				<div className="w-2/3">
+			<div className="flex flex-col lg:flex-row gap-12">
+				<div className="lg:w-2/3">
 					<div>
 						<Today city={city} date={formattedToday} temperature={todayTemperature} weatherCode={todayWeatherCode} unit="°" />
-						<div className="flex w-full gap-3 mt-4">
+						<div className="flex flex-wrap lg:flex-nowrap w-full gap-3 mt-4">
 							<InfoCard title="Feels Like" number={apparentTemperature} unit="°" />
 							<InfoCard title="Humidity" number={humidity} unit="%" />
 							<InfoCard title="Wind" number={windSpeed} unit=" km/h" />
@@ -176,7 +176,7 @@ const Welcome = () => {
 						</div>
 						<div className="mt-6">
 							<p>Daily forecast</p>
-							<div className="flex gap-2 mt-3">
+							<div className="flex flex-wrap lg:flex-nowrap gap-2 mt-3">
 								{Array.from({ length: 7 }).map((_, index) => (
 									<DailyCard day={dailyTime[index] || "2026-02-04"} weatherCode={dailyWeatherCode[index]} maxTemp={dailymaxTemp[index]} minTemp={dailyminTemp[index]} />
 								))}
@@ -184,7 +184,7 @@ const Welcome = () => {
 						</div>
 					</div>
 				</div>
-				<div className="bg-neutral-800 w-1/3 px-4 py-6 rounded-lg mt-10">
+				<div className="bg-neutral-800 w-full lg:w-1/3 px-4 py-6 rounded-lg mt-10">
 					<div className="flex justify-between mb-8">
 						<p>Hourly forecast</p>
 						<p>{day}</p>

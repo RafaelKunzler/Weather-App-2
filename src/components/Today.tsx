@@ -48,7 +48,7 @@ const icon: Record<WeatherIcon, ImageMetadata> = iconMap[weatherIcon]
 
 
   return (
-    < div className="bg-[url('../assets/images/bg-today-large.svg')] bg-no-repeat bg-center w-full rounded 2xl 
+    < div className="flex flex-wrap bg-[url('../assets/images/bg-today-large.svg')] bg-no-repeat bg-center w-full rounded 2xl 
     flex justify-between py-20 px-8 mt-10"
     >
       <div className="">
